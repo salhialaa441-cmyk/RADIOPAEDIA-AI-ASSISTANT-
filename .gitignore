@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Output folder
+output/
+
+# Debug files
+debug-*.js
+*.png
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
