@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radiopaedia Viewer - Test Status</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #3498db;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #888;
+      margin-bottom: 30px;
+    }
+    .test-section {
+      background: #0f0f23;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .test-section h2 {
+      color: #3498db;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    .test-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #222;
+    }
+    .test-item:last-child { border-bottom: none; }
+    .status {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .status.pass { background: #2ecc71; }
+    .status.fail { background: #e74c5c; }
+    .status.pending { background: #f39c12; }
+    .status-text { flex: 1; }
+    .status-detail {
+      color: #888;
+      font-size: 13px;
+    }
+    .btn {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .btn:hover { background: #2980b9; }
+    .btn-secondary {
+      background: #444;
+    }
+    .btn-secondary:hover { background: #555; }
+    code {
+      background: #222;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', monospace;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Radiopaedia Viewer - Test Status</h1>
+    <p class="subtitle">Automated verification of images and protocols</p>
+
+    <div class="test-section">
+      <h2>Server Status</h2>
+      <div class="test-item" id="server-test">
+        <div class="status pending">⏳</div>
+        <div class="status-text">
+          <div>Checking standalone server...</div>
+          <div class="status-detail">http://localhost:3456/api/health</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>Cases</h2>
+      <div class="test-item" id="cases-test">
+        <div class="status pending">⏳</div>
+        <div class="status-text">
+          <div>Loading cases...</div>
+          <div class="status-detail" id="cases-detail">Waiting for server check...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>Case Data & Protocols</h2>
+      <div class="test-item" id="protocols-test">
+        <div class="status pending">⏳</div>
+        <div class="status-text">
+          <div>Checking protocols...</div>
+          <div class="status-detail" id="protocols-detail">Waiting for cases...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>Image Loading</h2>
+      <div class="test-item" id="images-test">
+        <div class="status pending">⏳</div>
+        <div class="status-text">
+          <div>Testing image URLs...</div>
+          <div class="status-detail" id="images-detail">Waiting for protocols...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" onclick="runTests()">Re-run Tests</button>
+      <button class="btn btn-secondary" onclick="window.open('http://localhost:3456', '_blank')">Open App</button>
+    </div>
+
+    <div class="test-section" style="margin-top: 30px;">
+      <h2>Instructions</h2>
+      <ol style="margin-left: 20px; line-height: 1.8;">
+        <li>All tests above should show <span style="color: #2ecc71;">green checkmarks</span></li>
+        <li>If any test fails, check the error details</li>
+        <li>Click "Open App" to test the actual application</li>
+        <li>In the app, press <code>D</code> to show debug info</li>
+        <li>Share any error messages if tests fail</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3456';
+
+    function setStatus(id, status, text, detail) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const statusEl = el.querySelector('.status');
+      const textEl = el.querySelector('.status-text div');
+      const detailEl = el.querySelector('.status-detail');
+
+      statusEl.className = 'status ' + status;
+      statusEl.textContent = status === 'pass' ? '✓' : status === 'fail' ? '✗' : '⏳';
+      if (text) textEl.textContent = text;
+      if (detail) detailEl.textContent = detail;
+    }
+
+    async function runTests() {
+      // Test 1: Server health
+      try {
+        const health = await fetch(API_BASE + '/api/health');
+        if (!health.ok) throw new Error('Server returned ' + health.status);
+        const data = await health.json();
+        setStatus('server-test', 'pass', 'Server is running', 'Response: ' + JSON.stringify(data));
+
+        // Test 2: Load cases
+        try {
+          const cases = await fetch(API_BASE + '/api/cases');
+          if (!cases.ok) throw new Error('Failed to load cases');
+          const casesData = await cases.json();
+          setStatus('cases-test', 'pass',
+            casesData.length + ' cases loaded',
+            casesData.map(c => c.caseTitle).join(', '));
+
+          // Test 3: Load case data with protocols
+          if (casesData.length > 0) {
+            const caseFolder = casesData[0].folderName;
+            const caseData = await fetch(API_BASE + '/api/cases/' + caseFolder);
+            if (!caseData.ok) throw new Error('Failed to load case data');
+            const caseDataJson = await caseData.json();
+
+            const modalities = caseDataJson.modalities || [];
+            let totalProtocols = 0;
+            let protocolNames = [];
+            for (const m of modalities) {
+              totalProtocols += m.protocols.length;
+              protocolNames = protocolNames.concat(m.protocols.map(p => p.protocol));
+            }
+
+            setStatus('protocols-test', 'pass',
+              totalProtocols + ' protocols found across ' + modalities.length + ' modalities',
+              protocolNames.slice(0, 5).join(', ') + (protocolNames.length > 5 ? '...' : ''));
+
+            // Test 4: Load images
+            if (totalProtocols > 0) {
+              const protocol = modalities[0].protocols[0];
+              let protocolFolderName = protocol.folderName;
+              if (protocol.protocolPath) {
+                const parts = protocol.protocolPath.replace(/\\/g, '/').split('/');
+                protocolFolderName = parts[parts.length - 1];
+              }
+
+              const imageUrl = API_BASE + '/output/' + caseFolder + '/' + protocol.modality + '/' +
+                protocolFolderName + '/' + protocol.folderName + '/images/img_0001.jpg';
+
+              try {
+                const imgTest = await fetch(imageUrl);
+                if (!imgTest.ok) throw new Error('Image returned ' + imgTest.status);
+                setStatus('images-test', 'pass',
+                  'Images are accessible',
+                  'Test URL: ' + imageUrl + ' (' + protocol.imagesDownloaded + ' images available)');
+              } catch (e) {
+                setStatus('images-test', 'fail', 'Cannot load images', 'Error: ' + e.message);
+              }
+            }
+          }
+        } catch (e) {
+          setStatus('cases-test', 'fail', 'Failed to load cases', 'Error: ' + e.message);
+          setStatus('protocols-test', 'fail', 'Waiting for cases...', '');
+          setStatus('images-test', 'fail', 'Waiting for protocols...', '');
+        }
+      } catch (e) {
+        setStatus('server-test', 'fail', 'Server not reachable',
+          'Error: ' + e.message + '\n\nMake sure to run: npm run standalone');
+        setStatus('cases-test', 'fail', 'Waiting for server...', '');
+        setStatus('protocols-test', 'fail', 'Waiting for server...', '');
+        setStatus('images-test', 'fail', 'Waiting for server...', '');
+      }
+    }
+
+    // Auto-run tests on page load
+    runTests();
+  </script>
+</body>
+</html>

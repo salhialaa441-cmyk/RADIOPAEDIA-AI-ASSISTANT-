@@ -1,8 +1,14 @@
 # Dependencies
 node_modules/
 
-# Output folder
+# Output folder (scraped cases)
 output/
+
+# Build output
+dist/
+
+# Superpowers session data
+.superpowers/
 
 # Debug files
 debug-*.js

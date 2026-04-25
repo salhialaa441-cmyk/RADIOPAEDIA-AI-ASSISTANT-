@@ -1,0 +1,19 @@
+.annotation-layer {
+  pointer-events: auto;
+}
+
+.annotation-layer canvas {
+  pointer-events: auto;
+}
+
+/* Annotation tooltip */
+.annotation-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  pointer-events: none;
+  z-index: 100;
+}

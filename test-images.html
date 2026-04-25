@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Image Loading Test</title>
+  <style>
+    body { background: #1a1a2e; color: #eee; font-family: sans-serif; padding: 20px; }
+    .test-section { margin: 20px 0; padding: 15px; background: #0f0f23; border-radius: 8px; }
+    .test-section h2 { color: #3498db; margin-bottom: 10px; }
+    .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .image-item { background: #222; border-radius: 4px; overflow: hidden; }
+    .image-item img { width: 100%; height: 150px; object-fit: cover; }
+    .image-item .label { padding: 5px; font-size: 11px; text-align: center; }
+    .status { padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0; }
+    .status.ok { background: #2ecc71; }
+    .status.error { background: #e74c5c; }
+    pre { background: #222; padding: 10px; border-radius: 4px; overflow: auto; max-height: 300px; }
+  </style>
+</head>
+<body>
+  <h1>Image Loading Test</h1>
+  <p>This page tests if images can be loaded from the standalone server.</p>
+
+  <div class="test-section">
+    <h2>Step 1: Server Health</h2>
+    <div id="health-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Step 2: Fetch Case Data</h2>
+    <div id="case-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Step 3: Generate Image URLs</h2>
+    <div id="url-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Step 4: Load Images</h2>
+    <div id="image-result"></div>
+    <div class="image-grid" id="image-grid"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Console Log</h2>
+    <pre id="console-log"></pre>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3456';
+    const logEl = document.getElementById('console-log');
+
+    function log(msg) {
+      console.log(msg);
+      logEl.textContent += msg + '\n';
+    }
+
+    async function runTests() {
+      // Step 1: Health check
+      try {
+        const health = await fetch(API_BASE + '/api/health');
+        const data = await health.json();
+        document.getElementById('health-result').innerHTML =
+          '<span class="status ok">Server OK</span> ' + JSON.stringify(data);
+        log('Server health: OK');
+      } catch (e) {
+        document.getElementById('health-result').innerHTML =
+          '<span class="status error">Server Error</span> ' + e.message;
+        log('Server health: FAILED - ' + e.message);
+        return;
+      }
+
+      // Step 2: Fetch case data
+      try {
+        const caseData = await fetch(API_BASE + '/api/cases/231663_Radiology_Case_Radiopaediaorg');
+        const data = await caseData.json();
+        log('Case data loaded: ' + data.modalities.length + ' modalities');
+
+        let modalitiesHtml = '<ul>';
+        for (const m of data.modalities) {
+          modalitiesHtml += `<li>${m.name}: ${m.protocols.length} protocols</li>`;
+        }
+        modalitiesHtml += '</ul>';
+        document.getElementById('case-result').innerHTML = modalitiesHtml;
+
+        // Step 3: Generate image URLs
+        if (data.modalities.length > 0 && data.modalities[0].protocols.length > 0) {
+          const protocol = data.modalities[0].protocols[0];
+          log('Testing protocol: ' + protocol.protocol);
+
+          // Extract protocol folder name
+          let protocolFolderName = protocol.folderName;
+          if (protocol.protocolPath) {
+            const parts = protocol.protocolPath.replace(/\\/g, '/').split('/');
+            protocolFolderName = parts[parts.length - 1];
+          }
+          log('Protocol folder name: ' + protocolFolderName);
+
+          const baseUrl = API_BASE + '/output/' + protocol.caseFolder + '/' +
+            protocol.modality + '/' + protocolFolderName + '/' +
+            protocol.folderName + '/images';
+
+          document.getElementById('url-result').innerHTML =
+            '<code>' + baseUrl + '/img_0001.jpg</code> (and ' + protocol.imagesDownloaded + ' more)';
+          log('Base URL: ' + baseUrl);
+
+          // Step 4: Load images
+          const imageGrid = document.getElementById('image-grid');
+          const testImages = [];
+          for (let i = 0; i < Math.min(12, protocol.imagesDownloaded); i++) {
+            const url = baseUrl + '/img_' + String(i + 1).padStart(4, '0') + '.jpg';
+            testImages.push(url);
+          }
+
+          let loaded = 0;
+          let failed = 0;
+
+          testImages.forEach((url, i) => {
+            const item = document.createElement('div');
+            item.className = 'image-item';
+
+            const img = document.createElement('img');
+            img.src = url;
+            img.onload = () => {
+              loaded++;
+              log('Image ' + (i+1) + ' loaded: ' + url);
+              if (loaded + failed === testImages.length) {
+                document.getElementById('image-result').innerHTML =
+                  '<span class="status ok">' + loaded + ' images loaded</span>' +
+                  (failed > 0 ? ' <span class="status error">' + failed + ' failed</span>' : '');
+              }
+            };
+            img.onerror = () => {
+              failed++;
+              log('Image ' + (i+1) + ' FAILED: ' + url);
+              if (loaded + failed === testImages.length) {
+                document.getElementById('image-result').innerHTML =
+                  '<span class="status error">' + failed + ' images failed</span>' +
+                  (loaded > 0 ? ' <span class="status ok">' + loaded + ' loaded</span>' : '');
+              }
+            };
+
+            const label = document.createElement('div');
+            label.className = 'label';
+            label.textContent = 'img_' + String(i + 1).padStart(4, '0') + '.jpg';
+
+            item.appendChild(img);
+            item.appendChild(label);
+            imageGrid.appendChild(item);
+          });
+        }
+      } catch (e) {
+        document.getElementById('case-result').innerHTML =
+          '<span class="status error">Error</span> ' + e.message;
+        log('Case data: FAILED - ' + e.message);
+      }
+    }
+
+    runTests();
+  </script>
+</body>
+</html>

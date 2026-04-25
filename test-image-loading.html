@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Image Loading Test</title>
+  <style>
+    body { background: #1a1a2e; color: #eee; font-family: monospace; padding: 20px; }
+    .test-section { margin: 20px 0; padding: 15px; background: #0f0f23; border-radius: 8px; }
+    .test-section h2 { color: #3498db; margin-bottom: 10px; }
+    .image-test { margin: 10px 0; padding: 10px; background: #222; border-radius: 4px; }
+    .image-test img { max-width: 200px; max-height: 200px; border: 1px solid #444; }
+    .ok { color: #2ecc71; }
+    .error { color: #e74c5c; }
+    pre { background: #111; padding: 10px; border-radius: 4px; overflow: auto; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <h1>Image Loading Test - Electron Mode</h1>
+  <p>This page tests image loading using the same code path as the Electron app.</p>
+
+  <div class="test-section">
+    <h2>Step 1: Check electronAPI</h2>
+    <div id="electron-check"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Step 2: Load Cases via IPC</h2>
+    <div id="cases-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Step 3: Load Case Data</h2>
+    <div id="case-data-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Step 4: Generate Image URLs</h2>
+    <div id="url-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Step 5: Test Image Loading</h2>
+    <div id="image-test-result"></div>
+    <div id="image-container"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Console Log</h2>
+    <pre id="console-log"></pre>
+  </div>
+
+  <script>
+    const logEl = document.getElementById('console-log');
+    let logCount = 0;
+
+    function log(msg) {
+      console.log(msg);
+      logEl.textContent += msg + '\n';
+      logEl.scrollTop = logEl.scrollHeight;
+      logCount++;
+      if (logCount > 100) {
+        // Keep only last 100 lines
+        const lines = logEl.textContent.split('\n').slice(-100);
+        logEl.textContent = lines.join('\n');
+      }
+    }
+
+    function generateImageUrls(protocol, caseFolder, imageServerUrl) {
+      if (!protocol || !caseFolder || !imageServerUrl) {
+        return [];
+      }
+
+      let protocolFolderName = protocol.folderName;
+      if (protocol.protocolPath) {
+        const pathParts = protocol.protocolPath.replace(/\\/g, '/').split('/');
+        protocolFolderName = pathParts[pathParts.length - 1];
+      }
+
+      const baseUrl = `${imageServerUrl}/${caseFolder}/${protocol.modality}/${protocolFolderName}/${protocol.folderName}/images`;
+      const urls = [];
+      for (let i = 0; i < protocol.imagesDownloaded; i++) {
+        urls.push(`${baseUrl}/img_${String(i + 1).padStart(4, '0')}.jpg`);
+      }
+      return urls;
+    }
+
+    async function runTests() {
+      // Step 1: Check electronAPI
+      const hasElectronAPI = typeof window.electronAPI !== 'undefined';
+      document.getElementById('electron-check').innerHTML = hasElectronAPI
+        ? '<span class="ok">electronAPI is available</span>'
+        : '<span class="error">electronAPI is NOT available - running in browser?</span>';
+
+      if (!hasElectronAPI) {
+        log('ERROR: electronAPI not available. This page must be loaded in Electron.');
+        return;
+      }
+
+      // Step 2: Load cases
+      try {
+        const cases = await window.electronAPI.scanCases();
+        log(`Found ${cases.length} cases`);
+        document.getElementById('cases-result').innerHTML = cases.map(c =>
+          `<div>${c.caseTitle} (${c.folderName})</div>`
+        ).join('');
+      } catch (e) {
+        log('Error loading cases: ' + e.message);
+        document.getElementById('cases-result').innerHTML = '<span class="error">Error: ' + e.message + '</span>';
+        return;
+      }
+
+      // Step 3: Load case data
+      const cases = await window.electronAPI.scanCases();
+      if (cases.length === 0) {
+        log('No cases found');
+        return;
+      }
+
+      const firstCase = cases[0];
+      log(`Loading case data for: ${firstCase.caseTitle}`);
+
+      try {
+        const caseData = await window.electronAPI.getCaseData(firstCase.folderName);
+        log(`Case loaded: ${caseData.modalities.length} modalities`);
+
+        let modalityInfo = '<ul>';
+        caseData.modalities.forEach(m => {
+          modalityInfo += `<li>${m.name}: ${m.protocols.length} protocols</li>`;
+        });
+        modalityInfo += '</ul>';
+        document.getElementById('case-data-result').innerHTML = modalityInfo;
+
+        // Step 4: Generate URLs for first protocol
+        if (caseData.modalities.length > 0 && caseData.modalities[0].protocols.length > 0) {
+          const firstProtocol = caseData.modalities[0].protocols[0];
+          log(`Testing protocol: ${firstProtocol.protocol}`);
+          log(`Protocol data: ${JSON.stringify(firstProtocol, null, 2)}`);
+
+          const imageServerUrl = window.electronAPI.getImageServerUrl();
+          log(`Image server URL: ${imageServerUrl}`);
+
+          const imageUrls = generateImageUrls(firstProtocol, firstCase.folderName, imageServerUrl);
+          log(`Generated ${imageUrls.length} URLs`);
+          log(`First URL: ${imageUrls[0]}`);
+
+          document.getElementById('url-result').innerHTML = `<code>${imageUrls[0]}</code> (and ${imageUrls.length - 1} more)`;
+
+          // Step 5: Test loading first 6 images
+          const container = document.getElementById('image-container');
+          let loaded = 0;
+          let failed = 0;
+
+          for (let i = 0; i < Math.min(6, imageUrls.length); i++) {
+            const url = imageUrls[i];
+            const testDiv = document.createElement('div');
+            testDiv.className = 'image-test';
+
+            const infoEl = document.createElement('div');
+            infoEl.textContent = `Image ${i + 1}: ${url}`;
+            testDiv.appendChild(infoEl);
+
+            const img = document.createElement('img');
+            img.src = url;
+            img.crossOrigin = 'anonymous';
+
+            img.onload = () => {
+              loaded++;
+              infoEl.innerHTML = `<span class="ok">[OK]</span> Image ${i + 1} loaded (${img.width}x${img.height})`;
+              checkComplete();
+            };
+
+            img.onerror = (e) => {
+              failed++;
+              infoEl.innerHTML = `<span class="error">[FAILED]</span> Image ${i + 1} failed to load`;
+              checkComplete();
+            };
+
+            testDiv.appendChild(img);
+            container.appendChild(testDiv);
+          }
+
+          function checkComplete() {
+            if (loaded + failed >= Math.min(6, imageUrls.length)) {
+              document.getElementById('image-test-result').innerHTML =
+                `<span class="ok">${loaded} loaded</span>` +
+                (failed > 0 ? `, <span class="error">${failed} failed</span>` : '');
+            }
+          }
+        }
+      } catch (e) {
+        log('Error loading case data: ' + e.message);
+        document.getElementById('case-data-result').innerHTML = '<span class="error">Error: ' + e.message + '</span>';
+      }
+    }
+
+    runTests();
+  </script>
+</body>
+</html>

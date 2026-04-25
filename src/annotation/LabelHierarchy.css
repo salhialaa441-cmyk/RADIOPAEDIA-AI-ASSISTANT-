@@ -1,0 +1,107 @@
+.label-hierarchy {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border);
+}
+
+.label-search {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.label-search input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.label-search input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.label-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.label-system {
+  margin-bottom: 8px;
+}
+
+.label-system-header,
+.label-organ-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.label-system-header:hover,
+.label-organ-header:hover {
+  background: var(--bg-tertiary);
+}
+
+.expand-icon {
+  font-size: 10px;
+  color: var(--text-secondary);
+  transition: transform 0.2s;
+}
+
+.expand-icon.expanded {
+  transform: rotate(90deg);
+}
+
+.label-system-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.label-organ-name {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.label-organs {
+  margin-left: 12px;
+}
+
+.label-structures {
+  margin-left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.label-structure {
+  padding: 4px 8px 4px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.label-structure:hover {
+  background: var(--bg-tertiary);
+}
+
+.label-structure.selected {
+  background: var(--accent);
+  color: white;
+}

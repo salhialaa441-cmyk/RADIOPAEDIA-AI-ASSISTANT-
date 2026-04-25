@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Electron Detection Test</title>
+  <style>
+    body { background: #1a1a2e; color: #eee; font-family: monospace; padding: 20px; }
+    .result { padding: 10px; margin: 10px 0; border-radius: 4px; }
+    .ok { background: #2ecc71; }
+    .error { background: #e74c5c; }
+    pre { background: #0f0f23; padding: 10px; border-radius: 4px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h1>Electron Detection & API Test</h1>
+  <div id="results"></div>
+
+  <script>
+    const results = document.getElementById('results');
+
+    function addResult(title, ok, details) {
+      const div = document.createElement('div');
+      div.className = `result ${ok ? 'ok' : 'error'}`;
+      div.innerHTML = `<strong>${title}</strong>: ${ok ? 'PASS' : 'FAIL'}<pre>${details}</pre></div>`;
+      results.appendChild(div);
+    }
+
+    async function runTests() {
+      // Test 1: Check if electronAPI exists
+      const hasElectronAPI = typeof window.electronAPI !== 'undefined';
+      addResult('window.electronAPI exists', hasElectronAPI, JSON.stringify({
+        type: typeof window.electronAPI,
+        keys: hasElectronAPI ? Object.keys(window.electronAPI) : []
+      }, null, 2));
+
+      // Test 2: Check getImageServerUrl
+      if (hasElectronAPI && typeof window.electronAPI.getImageServerUrl === 'function') {
+        const url = window.electronAPI.getImageServerUrl();
+        addResult('getImageServerUrl()', true, `URL: ${url}`);
+      } else {
+        addResult('getImageServerUrl()', false, 'Function not available');
+      }
+
+      // Test 3: Check scanCases
+      if (hasElectronAPI && typeof window.electronAPI.scanCases === 'function') {
+        try {
+          const cases = await window.electronAPI.scanCases();
+          addResult('scanCases()', true, `Found ${cases.length} cases:\n${JSON.stringify(cases.map(c => c.caseTitle), null, 2)}`);
+        } catch (e) {
+          addResult('scanCases()', false, e.message);
+        }
+      } else {
+        addResult('scanCases()', false, 'Function not available');
+      }
+
+      // Test 4: Check getCaseData for first case
+      if (hasElectronAPI && typeof window.electronAPI.getCaseData === 'function') {
+        const firstCase = await window.electronAPI.scanCases().then(c => c[0]);
+        if (firstCase) {
+          try {
+            const caseData = await window.electronAPI.getCaseData(firstCase.folderName);
+            addResult('getCaseData()', true,
+              `Modalities: ${caseData.modalities.length}\n` +
+              `First modality: ${caseData.modalities[0]?.name}\n` +
+              `Protocols in first modality: ${caseData.modalities[0]?.protocols.length}\n` +
+              `First protocol: ${JSON.stringify(caseData.modalities[0]?.protocols[0], null, 2)}`
+            );
+          } catch (e) {
+            addResult('getCaseData()', false, e.message);
+          }
+        }
+      }
+
+      // Test 5: Image server health
+      try {
+        const response = await fetch('http://127.0.0.1:3456/output/');
+        addResult('Image server accessible', response.ok, `HTTP ${response.status}`);
+      } catch (e) {
+        addResult('Image server accessible', false, e.message);
+      }
+    }
+
+    runTests();
+  </script>
+</body>
+</html>

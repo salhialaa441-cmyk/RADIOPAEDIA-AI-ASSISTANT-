@@ -1,0 +1,185 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.viewer-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+}
+
+.modality-protocol-bar {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+}
+
+.modality-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.modality-tab {
+  padding: 6px 16px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modality-tab:hover {
+  background: var(--accent);
+}
+
+.modality-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.protocol-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.protocol-pill {
+  padding: 4px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.protocol-pill:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent);
+}
+
+.protocol-pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.empty-viewer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 18px;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  z-index: 1000;
+}
+
+.error-overlay {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: var(--error);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 8px;
+  max-width: 400px;
+  z-index: 1001;
+}
+
+/* Server status indicator */
+.server-status {
+  position: fixed;
+  bottom: 50px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  z-index: 1000;
+}
+
+.server-status .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+}
+
+.server-status.connected .status-dot {
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+}
+
+.server-status.disconnected .status-dot {
+  background: var(--error);
+  box-shadow: 0 0 8px var(--error);
+}
+
+/* Toggle cases button */
+.toggle-cases-btn {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  z-index: 1000;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-cases-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* When cases are hidden, move button to left edge */
+.toggle-cases-btn.cases-hidden {
+  left: 20px;
+}
+
+/* When cases are shown, move button to right of sidebar */
+.toggle-cases-btn.cases-shown {
+  left: 280px;
+}

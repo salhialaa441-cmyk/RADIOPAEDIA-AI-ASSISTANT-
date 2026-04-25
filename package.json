@@ -1,17 +1,71 @@
 {
-  "name": "radiopaedia-scraper",
+  "name": "radiopaedia-viewer",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Desktop application for browsing, annotating, and analyzing Radiopaedia medical imaging cases",
+  "main": "electron/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron:dev": "concurrently --kill-others \"vite\" \"wait-on --timeout 30000 http://localhost:5173 && electron .\"",
+    "electron:build": "vite build && electron-builder",
+    "scraper": "node scraper.js",
+    "test": "vitest",
+    "standalone": "node standalone-server.js"
   },
-  "keywords": [],
+  "keywords": [
+    "radiopaedia",
+    "medical-imaging",
+    "dicom",
+    "annotation",
+    "electron",
+    "react"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
     "axios": "^1.15.2",
-    "playwright": "^1.59.1"
+    "cors": "^2.8.6",
+    "express": "^5.1.0",
+    "http-proxy-middleware": "^3.0.5",
+    "konva": "^9.3.18",
+    "playwright": "^1.59.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-konva": "^19.0.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.4.1",
+    "concurrently": "^9.1.2",
+    "electron": "^35.3.2",
+    "electron-builder": "^25.1.8",
+    "vite": "^6.3.5",
+    "wait-on": "^8.0.3"
+  },
+  "build": {
+    "appId": "com.radiopaedia.viewer",
+    "productName": "Radiopaedia Viewer",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "dist/**/*",
+      "output/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "public/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "public/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "public/icon.png"
+    }
   }
 }

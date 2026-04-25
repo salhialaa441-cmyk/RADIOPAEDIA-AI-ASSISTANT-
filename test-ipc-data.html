@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IPC Data Test</title>
+  <style>
+    body { background: #1a1a2e; color: #eee; font-family: monospace; padding: 20px; }
+    pre { background: #0f0f23; padding: 10px; border-radius: 4px; overflow: auto; max-height: 500px; }
+    .ok { color: #2ecc71; }
+    .error { color: #e74c5c; }
+  </style>
+</head>
+<body>
+  <h1>IPC Data Test - Verify protocolPath</h1>
+  <pre id="output"></pre>
+
+  <script>
+    const output = document.getElementById('output');
+    function log(msg) {
+      output.textContent += msg + '\n';
+    }
+
+    async function test() {
+      if (!window.electronAPI) {
+        log('ERROR: electronAPI not available!');
+        return;
+      }
+
+      log('electronAPI available: YES');
+      log('');
+
+      // Load cases
+      const cases = await window.electronAPI.scanCases();
+      log(`Cases found: ${cases.length}`);
+      cases.forEach(c => log(`  - ${c.caseTitle}`));
+      log('');
+
+      // Load first case
+      if (cases.length > 0) {
+        const firstCase = cases[0];
+        log(`Loading case: ${firstCase.folderName}`);
+
+        const caseData = await window.electronAPI.getCaseData(firstCase.folderName);
+        log(`Modalities: ${caseData.modalities.length}`);
+        log('');
+
+        // Check first modality's first protocol
+        if (caseData.modalities.length > 0 && caseData.modalities[0].protocols.length > 0) {
+          const firstProtocol = caseData.modalities[0].protocols[0];
+          log('First protocol details:');
+          log(`  protocol: ${firstProtocol.protocol}`);
+          log(`  folderName: ${firstProtocol.folderName}`);
+          log(`  modality: ${firstProtocol.modality}`);
+          log(`  imagesDownloaded: ${firstProtocol.imagesDownloaded}`);
+          log(`  protocolPath: ${firstProtocol.protocolPath}`);
+          log(`  protocolPath type: ${typeof firstProtocol.protocolPath}`);
+          log(`  protocolPath exists: ${firstProtocol.protocolPath !== undefined}`);
+          log('');
+
+          // Generate URL
+          let protocolFolderName = firstProtocol.folderName;
+          if (firstProtocol.protocolPath) {
+            const pathParts = firstProtocol.protocolPath.replace(/\\/g, '/').split('/');
+            protocolFolderName = pathParts[pathParts.length - 1];
+          }
+
+          log(`Extracted protocolFolderName: ${protocolFolderName}`);
+
+          const imageServerUrl = window.electronAPI.getImageServerUrl();
+          const baseUrl = `${imageServerUrl}/${firstCase.folderName}/${firstProtocol.modality}/${protocolFolderName}/${firstProtocol.folderName}/images`;
+          const firstImageUrl = `${baseUrl}/img_0001.jpg`;
+
+          log('');
+          log(`Generated URL: ${firstImageUrl}`);
+
+          // Test loading the image
+          log('');
+          log('Testing image load...');
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.src = firstImageUrl;
+          img.onload = () => log(`[SUCCESS] Image loaded! Size: ${img.width}x${img.height}`);
+          img.onerror = (e) => log(`[FAILED] Image failed to load`);
+        }
+      }
+    }
+
+    test();
+  </script>
+</body>
+</html>
