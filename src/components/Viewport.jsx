@@ -304,8 +304,14 @@ export default function Viewport({
       <div
         className="viewport-canvas"
         style={{
-          // Combine brightness/contrast toolbar controls with Window/Level enhancement
-          filter: `brightness(${brightness * (windowWidth / 256) * gamma}%) contrast(${contrast * (256 / windowWidth)}%)`,
+          // Apply enhancement effects: Window Level controls brightness, Window Width controls contrast
+          // Window Level (0-4095): higher = brighter, lower = darker
+          // Window Width (1-4096): higher = lower contrast, lower = higher contrast
+          // Gamma (0.1-3.0): higher = darker, lower = brighter
+          filter: `
+            brightness(${brightness * (windowCenter / 128) * (1 / gamma)}%)
+            contrast(${contrast * (256 / Math.max(windowWidth, 1))}%)
+          `.replace(/\s+/g, ' '),
         }}
       >
         <Stage
