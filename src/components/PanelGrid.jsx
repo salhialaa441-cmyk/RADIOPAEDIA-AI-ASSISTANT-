@@ -13,6 +13,9 @@ export default function PanelGrid({ protocols, caseFolder, imageServerUrl }) {
   const [resizingPanel, setResizingPanel] = useState(null);
   const containerRef = useRef(null);
 
+  // Remove annotation-related panel state
+  // panels no longer need: annotations, selectedAnnotationId, selectedTool, selectedLabel
+
   // Initialize with single panel when protocols change
   useEffect(() => {
     if (protocols && protocols.length > 0 && panels.length === 0) {
@@ -53,13 +56,7 @@ export default function PanelGrid({ protocols, caseFolder, imageServerUrl }) {
       currentImageIndex: 0,
       images: generateImageUrls(protocol, caseFolder, imageServerUrl),
       tool: 'pan',
-      scale: 1,
-      position: { x: 0, y: 0 },
       syncEnabled: false,
-      annotations: [], // Per-panel annotations
-      selectedAnnotationId: null,
-      selectedTool: null,
-      selectedLabel: null,
     };
 
     setPanels((prev) => {
@@ -153,11 +150,7 @@ export default function PanelGrid({ protocols, caseFolder, imageServerUrl }) {
     setActivePanelId(panelId);
   }
 
-  function handleAnnotationComplete(panelId, annotation) {
-    updatePanel(panelId, {
-      annotations: [...panels.find(p => p.id === panelId).annotations, annotation]
-    });
-  }
+  // Removed handleAnnotationComplete - annotation tools removed
 
   // Handle divider drag for resizing
   function handleDividerMouseDown(panelId, direction) {
@@ -222,14 +215,6 @@ export default function PanelGrid({ protocols, caseFolder, imageServerUrl }) {
           onSyncToggle={() => toggleSync(panel.id)}
           onClose={() => removePanel(panel.id)}
           isSynced={syncGroupIds.includes(panel.id)}
-          annotations={panel.annotations}
-          selectedAnnotationId={panel.selectedAnnotationId}
-          selectedTool={panel.selectedTool}
-          selectedLabel={panel.selectedLabel}
-          onAnnotationComplete={(annotation) => handleAnnotationComplete(panel.id, annotation)}
-          onAnnotationSelect={(id) => updatePanel(panel.id, { selectedAnnotationId: id })}
-          onToolSelect={(tool) => updatePanel(panel.id, { selectedTool: tool })}
-          onLabelSelect={(label) => updatePanel(panel.id, { selectedLabel: label })}
           style={panelSizes[panel.id] ? { flex: `0 0 ${panelSizes[panel.id]}%` } : {}}
         />
         {showHorizontalDivider && (

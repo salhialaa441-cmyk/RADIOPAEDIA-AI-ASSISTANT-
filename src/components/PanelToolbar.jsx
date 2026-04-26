@@ -19,12 +19,6 @@ export default function PanelToolbar({
   onBrightnessChange,
   onContrastChange,
   protocolName,
-  showAnnotationPanel,
-  onToggleAnnotationPanel,
-  selectedTool,
-  selectedLabel,
-  onToolSelect,
-  onLabelSelect,
   isPlaying,
   onToggleCinePlay,
   playbackSpeed,
@@ -34,10 +28,27 @@ export default function PanelToolbar({
   onToggleMinimize,
   onToggleMaximize,
 }) {
-  const [showSettings, setShowSettings] = useState(false);
-  const [showAnnotationTools, setShowAnnotationTools] = useState(false);
+  const [showToolsPopup, setShowToolsPopup] = useState(false);
   const [showCinePopup, setShowCinePopup] = useState(false);
+  const toolsRef = useRef(null);
   const cineRef = useRef(null);
+
+  // Close tools popup when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (toolsRef.current && !toolsRef.current.contains(event.target)) {
+        setShowToolsPopup(false);
+      }
+    }
+
+    if (showToolsPopup) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showToolsPopup]);
 
   // Close cine popup when clicking outside
   useEffect(() => {
@@ -59,120 +70,74 @@ export default function PanelToolbar({
   return (
     <div className="panel-toolbar">
       <div className="toolbar-left">
-        <div className="toolbar-tools">
+        <div className="toolbar-tools" ref={toolsRef}>
           <button
-            className={`tool-btn ${tool === 'pan' ? 'active' : ''}`}
-            onClick={() => onToolChange('pan')}
-            title="Pan (H)"
+            className={`tool-btn ${showToolsPopup ? 'active' : ''}`}
+            onClick={() => setShowToolsPopup(!showToolsPopup)}
+            title="Tools"
           >
-            ✋
+            🛠
           </button>
-          <button
-            className={`tool-btn ${tool === 'zoom' ? 'active' : ''}`}
-            onClick={() => onToolChange('zoom')}
-            title="Zoom (Z)"
-          >
-            🔍
-          </button>
-          <button
-            className={`tool-btn ${showSettings ? 'active' : ''}`}
-            onClick={() => setShowSettings(!showSettings)}
-            title="Brightness/Contrast"
-          >
-            ☀
-          </button>
-          <button
-            className="tool-btn"
-            onClick={onFit}
-            title="Fit to window (F)"
-          >
-            ⊞
-          </button>
-          <button
-            className={`tool-btn ${showAnnotationTools ? 'active' : ''}`}
-            onClick={() => setShowAnnotationTools(!showAnnotationTools)}
-            title="Annotation tools"
-          >
-            📝
-          </button>
-        </div>
 
-        {showSettings && (
-          <div className="brightness-contrast-controls">
-            <div className="slider-group">
-              <label>Brightness</label>
-              <input
-                type="range"
-                min="50"
-                max="150"
-                value={brightness}
-                onChange={(e) => onBrightnessChange(Number(e.target.value))}
-              />
-              <span>{brightness}%</span>
-            </div>
-            <div className="slider-group">
-              <label>Contrast</label>
-              <input
-                type="range"
-                min="50"
-                max="150"
-                value={contrast}
-                onChange={(e) => onContrastChange(Number(e.target.value))}
-              />
-              <span>{contrast}%</span>
-            </div>
-          </div>
-        )}
-
-        {showAnnotationTools && (
-          <div className="annotation-tools-controls">
-            <div className="tool-selector">
-              <button
-                className={`annotation-tool-btn ${selectedTool === 'bbox' ? 'active' : ''}`}
-                onClick={() => onToolSelect(selectedTool === 'bbox' ? null : 'bbox')}
-                title="Bounding Box (1)"
-              >
-                ⬜
-              </button>
-              <button
-                className={`annotation-tool-btn ${selectedTool === 'polygon' ? 'active' : ''}`}
-                onClick={() => onToolSelect(selectedTool === 'polygon' ? null : 'polygon')}
-                title="Polygon (2)"
-              >
-                ⬠
-              </button>
-              <button
-                className={`annotation-tool-btn ${selectedTool === 'keypoint' ? 'active' : ''}`}
-                onClick={() => onToolSelect(selectedTool === 'keypoint' ? null : 'keypoint')}
-                title="Keypoint (3)"
-              >
-                ⬤
-              </button>
-              <button
-                className={`annotation-tool-btn ${selectedTool === 'brush' ? 'active' : ''}`}
-                onClick={() => onToolSelect(selectedTool === 'brush' ? null : 'brush')}
-                title="Brush (4)"
-              >
-                🖌
-              </button>
-            </div>
-
-            {selectedLabel && (
-              <div className="selected-label">
-                <span className="label-dot" style={{ background: getLabelColor(selectedLabel) }} />
-                <span>{selectedLabel}</span>
+          {showToolsPopup && (
+            <div className="tools-popup">
+              <div className="tools-popup-section">
+                <span className="tools-popup-label">View</span>
+                <div className="tools-popup-grid">
+                  <button
+                    className={`tool-btn ${tool === 'pan' ? 'active' : ''}`}
+                    onClick={() => { onToolChange('pan'); setShowToolsPopup(false); }}
+                    title="Pan (H)"
+                  >
+                    ✋
+                  </button>
+                  <button
+                    className={`tool-btn ${tool === 'zoom' ? 'active' : ''}`}
+                    onClick={() => { onToolChange('zoom'); setShowToolsPopup(false); }}
+                    title="Zoom (Z)"
+                  >
+                    🔍
+                  </button>
+                  <button
+                    className="tool-btn"
+                    onClick={() => { onFit(); setShowToolsPopup(false); }}
+                    title="Fit to window (F)"
+                  >
+                    ⊞
+                  </button>
+                </div>
               </div>
-            )}
 
-            <button
-              className="annotation-panel-btn"
-              onClick={onToggleAnnotationPanel}
-              title="Toggle annotation panel"
-            >
-              {showAnnotationPanel ? 'Hide Panel' : 'Show Panel'}
-            </button>
-          </div>
-        )}
+              <div className="tools-popup-section">
+                <span className="tools-popup-label">Adjust</span>
+                <div className="tools-popup-sliders">
+                  <div className="slider-group">
+                    <label>Brightness</label>
+                    <input
+                      type="range"
+                      min="50"
+                      max="150"
+                      value={brightness}
+                      onChange={(e) => onBrightnessChange(Number(e.target.value))}
+                    />
+                    <span>{brightness}%</span>
+                  </div>
+                  <div className="slider-group">
+                    <label>Contrast</label>
+                    <input
+                      type="range"
+                      min="50"
+                      max="150"
+                      value={contrast}
+                      onChange={(e) => onContrastChange(Number(e.target.value))}
+                    />
+                    <span>{contrast}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="toolbar-center">
@@ -262,15 +227,3 @@ export default function PanelToolbar({
   );
 }
 
-function getLabelColor(label) {
-  const labelColors = {
-    'Vertebra': '#FF6B6B',
-    'C1': '#FF6B6B',
-    'C2': '#FF6B6B',
-    'LV': '#4ECDC4',
-    'Myocardium': '#45B7D1',
-    'Psoas': '#96CEB4',
-    'default': '#FFEAA7',
-  };
-  return labelColors[label] || labelColors['default'];
-}

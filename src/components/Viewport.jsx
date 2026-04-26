@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Stage, Layer, Image as KonvaImage } from 'react-konva';
 import PanelToolbar from './PanelToolbar';
-import AnnotationLayer from '../annotation/AnnotationLayer';
 import './Viewport.css';
 
 export default function Viewport({
@@ -18,14 +17,6 @@ export default function Viewport({
   onSyncToggle,
   onClose,
   isSynced,
-  annotations,
-  selectedAnnotationId,
-  selectedTool,
-  selectedLabel,
-  onAnnotationComplete,
-  onAnnotationSelect,
-  onToolSelect,
-  onLabelSelect,
 }) {
   const [image, setImage] = useState(null);
   const [scale, setScale] = useState(1);
@@ -36,7 +27,6 @@ export default function Viewport({
   const [containerSize, setContainerSize] = useState({ width: 400, height: 300 });
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
-  const [showAnnotationPanel, setShowAnnotationPanel] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
 
@@ -347,19 +337,6 @@ export default function Viewport({
                 listening={true}
               />
             )}
-
-            {/* Annotation layer */}
-            {image && selectedTool && (
-              <AnnotationLayer
-                annotations={annotations}
-                selectedTool={selectedTool}
-                selectedLabel={selectedLabel}
-                onAnnotationComplete={onAnnotationComplete}
-                onAnnotationSelect={onAnnotationSelect}
-                selectedAnnotationId={selectedAnnotationId}
-                imageDimensions={{ width: image.width, height: image.height }}
-              />
-            )}
           </Layer>
         </Stage>
 
@@ -390,19 +367,6 @@ export default function Viewport({
             <span>1</span>
             <span>{currentImageIndex + 1}</span>
             <span>{images.length}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Annotation panel */}
-      {showAnnotationPanel && (
-        <div className="annotation-panel">
-          <div className="annotation-panel-header">
-            <span>Annotations</span>
-            <button onClick={() => setShowAnnotationPanel(false)}>×</button>
-          </div>
-          <div className="annotation-panel-content">
-            <p>Annotation tools coming soon...</p>
           </div>
         </div>
       )}
