@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './PanelToolbar.css';
 
 export default function PanelToolbar({
@@ -36,6 +36,25 @@ export default function PanelToolbar({
 }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showAnnotationTools, setShowAnnotationTools] = useState(false);
+  const [showCinePopup, setShowCinePopup] = useState(false);
+  const cineRef = useRef(null);
+
+  // Close cine popup when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (cineRef.current && !cineRef.current.contains(event.target)) {
+        setShowCinePopup(false);
+      }
+    }
+
+    if (showCinePopup) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showCinePopup]);
 
   return (
     <div className="panel-toolbar">
@@ -163,26 +182,39 @@ export default function PanelToolbar({
       </div>
 
       <div className="toolbar-right">
-        <button
-          className={`tool-btn cine-btn ${isPlaying ? 'active' : ''}`}
-          onClick={onToggleCinePlay}
-          title={isPlaying ? 'Pause cine play' : 'Start cine play'}
-          disabled={totalImages <= 1}
-        >
-          {isPlaying ? '⏸' : '▶'}
-        </button>
+        <div className="cine-control-wrapper" ref={cineRef}>
+          <button
+            className={`tool-btn cine-btn ${isPlaying ? 'active' : ''}`}
+            onClick={() => setShowCinePopup(!showCinePopup)}
+            title={isPlaying ? 'Pause cine play' : 'Start cine play'}
+            disabled={totalImages <= 1}
+          >
+            {isPlaying ? '⏸' : '▶'}
+          </button>
 
-        <div className="speed-control">
-          <label>Speed:</label>
-          <input
-            type="range"
-            min="1"
-            max="60"
-            value={playbackSpeed}
-            onChange={onSpeedChange}
-            className="speed-slider"
-          />
-          <span>{playbackSpeed} fps</span>
+          {showCinePopup && (
+            <div className="cine-popup">
+              <button
+                className={`cine-play-btn ${isPlaying ? 'active' : ''}`}
+                onClick={onToggleCinePlay}
+                title={isPlaying ? 'Pause' : 'Play'}
+              >
+                {isPlaying ? '⏸' : '▶'}
+              </button>
+              <div className="speed-control">
+                <label>Speed:</label>
+                <input
+                  type="range"
+                  min="1"
+                  max="60"
+                  value={playbackSpeed}
+                  onChange={onSpeedChange}
+                  className="speed-slider"
+                />
+                <span>{playbackSpeed} fps</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <button

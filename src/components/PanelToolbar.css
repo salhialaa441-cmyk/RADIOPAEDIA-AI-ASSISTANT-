@@ -28,10 +28,6 @@
   font-size: 12px;
 }
 
-/* Speed control - always visible */
-.toolbar-right .speed-control {
-  display: flex;
-}
 
 /* Hide zoom indicator on smaller toolbars */
 .toolbar-right .zoom-indicator {
@@ -423,4 +419,73 @@
 .speed-control span {
   min-width: 35px;
   font-variant-numeric: tabular-nums;
+}
+
+/* Cine control wrapper for popup positioning */
+.cine-control-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Cine popup - appears below cine button */
+.cine-popup {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  animation: slideDown 0.15s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cine-popup .cine-play-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.cine-popup .cine-play-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.cine-popup .cine-play-btn.active {
+  background: #4CAF50;
+  border-color: #4CAF50;
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.cine-popup .speed-control {
+  background: var(--bg-tertiary);
+  padding: 4px 8px;
+  border-radius: 4px;
 }
