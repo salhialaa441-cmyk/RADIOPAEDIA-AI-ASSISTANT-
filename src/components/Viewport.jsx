@@ -304,7 +304,8 @@ export default function Viewport({
       <div
         className="viewport-canvas"
         style={{
-          filter: `brightness(${brightness}%) contrast(${contrast}%)`,
+          // Combine brightness/contrast toolbar controls with Window/Level enhancement
+          filter: `brightness(${brightness * (windowWidth / 256) * gamma}%) contrast(${contrast * (256 / windowWidth)}%)`,
         }}
       >
         <Stage
