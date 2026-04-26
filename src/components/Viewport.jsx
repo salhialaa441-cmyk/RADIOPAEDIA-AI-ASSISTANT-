@@ -27,13 +27,11 @@ export default function Viewport({
   const stageRef = useRef(null);
   const containerRef = useRef(null);
   const [containerSize, setContainerSize] = useState({ width: 400, height: 300 });
-  const [brightness, setBrightness] = useState(100);
-  const [contrast, setContrast] = useState(100);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [showEnhancementPanel, setShowEnhancementPanel] = useState(false);
 
-  // Image enhancement hook
+  // Image enhancement hook (Window/Level + Gamma)
   const {
     windowCenter,
     windowWidth,
@@ -182,9 +180,6 @@ export default function Viewport({
         onToolChange('pan');
       } else if (e.key === 'z' || e.key === 'Z') {
         onToolChange('zoom');
-      } else if (e.key === 'b' || e.key === 'B') {
-        // Toggle brightness/contrast panel
-        setBrightness((prev) => prev === 100 ? 100 : 100);
       } else if (e.key === 'e' || e.key === 'E') {
         // Toggle enhancement panel
         setShowEnhancementPanel(!showEnhancementPanel);
@@ -284,10 +279,6 @@ export default function Viewport({
         onSyncToggle={onSyncToggle}
         isSynced={isSynced}
         onClose={onClose}
-        brightness={brightness}
-        contrast={contrast}
-        onBrightnessChange={setBrightness}
-        onContrastChange={setContrast}
         protocolName={protocol?.protocol}
         isPlaying={isPlaying}
         onToggleCinePlay={toggleCinePlay}
@@ -304,14 +295,11 @@ export default function Viewport({
       <div
         className="viewport-canvas"
         style={{
-          // Apply enhancement effects: Window Level controls brightness, Window Width controls contrast
-          // Window Level (0-4095): higher = brighter, lower = darker
-          // Window Width (1-4096): higher = lower contrast, lower = higher contrast
-          // Gamma (0.1-3.0): higher = darker, lower = brighter
-          filter: `
-            brightness(${brightness * (windowCenter / 128) * (1 / gamma)}%)
-            contrast(${contrast * (256 / Math.max(windowWidth, 1))}%)
-          `.replace(/\s+/g, ' '),
+          // Window/Level + Gamma enhancement via CSS filter
+          // Window Center: controls brightness (default 128)
+          // Window Width: controls contrast (default 256)
+          // Gamma: fine-tunes brightness curve (default 1.0)
+          filter: `brightness(${(windowCenter / 128) * (1 / gamma) * 100}%) contrast(${(256 / Math.max(windowWidth, 1)) * 100}%)`,
         }}
       >
         <Stage

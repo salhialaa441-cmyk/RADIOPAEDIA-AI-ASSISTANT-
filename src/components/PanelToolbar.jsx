@@ -15,10 +15,6 @@ export default function PanelToolbar({
   onSyncToggle,
   isSynced,
   onClose,
-  brightness,
-  contrast,
-  onBrightnessChange,
-  onContrastChange,
   protocolName,
   isPlaying,
   onToggleCinePlay,
@@ -85,34 +81,6 @@ export default function PanelToolbar({
                   >
                     ⊞
                   </button>
-                </div>
-              </div>
-
-              <div className="tools-popup-section">
-                <span className="tools-popup-label">Adjust</span>
-                <div className="tools-popup-sliders">
-                  <div className="slider-group">
-                    <label>Brightness</label>
-                    <input
-                      type="range"
-                      min="50"
-                      max="150"
-                      value={brightness}
-                      onChange={(e) => onBrightnessChange(Number(e.target.value))}
-                    />
-                    <span>{brightness}%</span>
-                  </div>
-                  <div className="slider-group">
-                    <label>Contrast</label>
-                    <input
-                      type="range"
-                      min="50"
-                      max="150"
-                      value={contrast}
-                      onChange={(e) => onContrastChange(Number(e.target.value))}
-                    />
-                    <span>{contrast}%</span>
-                  </div>
                 </div>
               </div>
             </div>
