@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import './PanelToolbar.css';
+import { useClickOutside } from '../hooks/useClickOutside';
 
 export default function PanelToolbar({
   tool,
@@ -33,39 +34,8 @@ export default function PanelToolbar({
   const toolsRef = useRef(null);
   const cineRef = useRef(null);
 
-  // Close tools popup when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (toolsRef.current && !toolsRef.current.contains(event.target)) {
-        setShowToolsPopup(false);
-      }
-    }
-
-    if (showToolsPopup) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showToolsPopup]);
-
-  // Close cine popup when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (cineRef.current && !cineRef.current.contains(event.target)) {
-        setShowCinePopup(false);
-      }
-    }
-
-    if (showCinePopup) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showCinePopup]);
+  useClickOutside(toolsRef, showToolsPopup, () => setShowToolsPopup(false));
+  useClickOutside(cineRef, showCinePopup, () => setShowCinePopup(false));
 
   return (
     <div className="panel-toolbar">

@@ -13,9 +13,6 @@ export default function PanelGrid({ protocols, caseFolder, imageServerUrl }) {
   const [resizingPanel, setResizingPanel] = useState(null);
   const containerRef = useRef(null);
 
-  // Remove annotation-related panel state
-  // panels no longer need: annotations, selectedAnnotationId, selectedTool, selectedLabel
-
   // Initialize with single panel when protocols change
   useEffect(() => {
     if (protocols && protocols.length > 0 && panels.length === 0) {

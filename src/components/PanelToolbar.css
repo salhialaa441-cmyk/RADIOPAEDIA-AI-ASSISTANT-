@@ -62,15 +62,11 @@
   position: relative;
 }
 
-/* Tools popup - appears below tools button */
-.tools-popup {
+/* Shared popup base styles */
+.popup {
   position: absolute;
   top: 100%;
-  left: 0;
   margin-top: 4px;
-  display: flex;
-  gap: 12px;
-  padding: 10px 12px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -88,6 +84,15 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Tools popup */
+.tools-popup {
+  composes: popup;
+  left: 0;
+  display: flex;
+  gap: 12px;
+  padding: 10px 12px;
 }
 
 .tools-popup-section {
@@ -374,33 +379,14 @@
   align-items: center;
 }
 
-/* Cine popup - appears below cine button */
+/* Cine popup */
 .cine-popup {
-  position: absolute;
-  top: 100%;
+  composes: popup;
   right: 0;
-  margin-top: 4px;
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  animation: slideDown 0.15s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .cine-popup .cine-play-btn {
