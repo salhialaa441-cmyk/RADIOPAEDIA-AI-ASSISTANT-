@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Stage, Layer, Image as KonvaImage } from 'react-konva';
 import PanelToolbar from './PanelToolbar';
+import EnhancementPanel from './EnhancementPanel';
+import { useImageEnhancement } from '../hooks/useImageEnhancement';
 import './Viewport.css';
 
 export default function Viewport({
@@ -29,6 +31,17 @@ export default function Viewport({
   const [contrast, setContrast] = useState(100);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
+  const [showEnhancementPanel, setShowEnhancementPanel] = useState(false);
+
+  // Image enhancement hook
+  const {
+    windowCenter,
+    windowWidth,
+    gamma,
+    setWindowLevel,
+    setGamma,
+    reset,
+  } = useImageEnhancement();
 
   // Track the current protocol to detect protocol changes
   const currentProtocolRef = useRef(null);
@@ -287,12 +300,6 @@ export default function Viewport({
         onBrightnessChange={setBrightness}
         onContrastChange={setContrast}
         protocolName={protocol?.protocol}
-        showAnnotationPanel={showAnnotationPanel}
-        onToggleAnnotationPanel={() => setShowAnnotationPanel(!showAnnotationPanel)}
-        selectedTool={selectedTool}
-        selectedLabel={selectedLabel}
-        onToolSelect={onToolSelect}
-        onLabelSelect={onLabelSelect}
         isPlaying={isPlaying}
         onToggleCinePlay={toggleCinePlay}
         playbackSpeed={playbackSpeed}
@@ -301,6 +308,8 @@ export default function Viewport({
         isMaximized={isMaximized}
         onToggleMinimize={toggleMinimize}
         onToggleMaximize={toggleMaximize}
+        showEnhancementPanel={showEnhancementPanel}
+        onEnhancementToggle={() => setShowEnhancementPanel(!showEnhancementPanel)}
       />
 
       <div
@@ -369,6 +378,18 @@ export default function Viewport({
             <span>{images.length}</span>
           </div>
         </div>
+      )}
+
+      {/* Enhancement Panel */}
+      {showEnhancementPanel && (
+        <EnhancementPanel
+          windowCenter={windowCenter}
+          windowWidth={windowWidth}
+          gamma={gamma}
+          onWindowLevelChange={setWindowLevel}
+          onGammaChange={setGamma}
+          onReset={reset}
+        />
       )}
     </div>
   );

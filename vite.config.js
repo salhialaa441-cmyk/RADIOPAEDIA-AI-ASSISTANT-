@@ -23,4 +23,9 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
+  // Add GLSL shader loading
+  assetsInclude: ['**/*.glsl'],
+  test: {
+    environment: 'jsdom',
+  },
 });

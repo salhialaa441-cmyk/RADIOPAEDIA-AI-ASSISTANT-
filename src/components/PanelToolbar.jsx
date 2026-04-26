@@ -28,6 +28,8 @@ export default function PanelToolbar({
   isMaximized,
   onToggleMinimize,
   onToggleMaximize,
+  showEnhancementPanel,
+  onEnhancementToggle,
 }) {
   const [showToolsPopup, setShowToolsPopup] = useState(false);
   const [showCinePopup, setShowCinePopup] = useState(false);
@@ -47,6 +49,14 @@ export default function PanelToolbar({
             title="Tools"
           >
             🛠
+          </button>
+
+          <button
+            className={`tool-btn ${showEnhancementPanel ? 'active' : ''}`}
+            onClick={onEnhancementToggle}
+            title="Image Enhancement (Window/Level, Gamma)"
+          >
+            🎨
           </button>
 
           {showToolsPopup && (
