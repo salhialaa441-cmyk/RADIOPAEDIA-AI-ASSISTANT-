@@ -180,28 +180,14 @@ export default function Viewport({
         handleFit();
       } else if (e.key === 'h' || e.key === 'H') {
         onToolChange('pan');
-        onToolSelect('pan');
       } else if (e.key === 'z' || e.key === 'Z') {
         onToolChange('zoom');
-        onToolSelect('zoom');
       } else if (e.key === 'b' || e.key === 'B') {
         // Toggle brightness/contrast panel
         setBrightness((prev) => prev === 100 ? 100 : 100);
       } else if (e.key === 'e' || e.key === 'E') {
         // Toggle enhancement panel
         setShowEnhancementPanel(!showEnhancementPanel);
-      } else if (e.key === '1') {
-        onToolSelect('bbox');
-        onToolChange('pan');
-      } else if (e.key === '2') {
-        onToolSelect('polygon');
-        onToolChange('pan');
-      } else if (e.key === '3') {
-        onToolSelect('keypoint');
-        onToolChange('pan');
-      } else if (e.key === '4') {
-        onToolSelect('brush');
-        onToolChange('pan');
       } else if (e.key === ' ' || e.key === 'Spacebar') {
         // Space bar toggles cine play
         e.preventDefault();
@@ -217,7 +203,7 @@ export default function Viewport({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentImageIndex, images.length, isActive, onSliceChange, onToolChange, onToolSelect, toggleCinePlay]);
+  }, [currentImageIndex, images.length, isActive, onSliceChange, onToolChange, toggleCinePlay]);
 
   // Handle drag end
   function handleDragEnd(e) {
