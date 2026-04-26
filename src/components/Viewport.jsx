@@ -187,6 +187,9 @@ export default function Viewport({
       } else if (e.key === 'b' || e.key === 'B') {
         // Toggle brightness/contrast panel
         setBrightness((prev) => prev === 100 ? 100 : 100);
+      } else if (e.key === 'e' || e.key === 'E') {
+        // Toggle enhancement panel
+        setShowEnhancementPanel(!showEnhancementPanel);
       } else if (e.key === '1') {
         onToolSelect('bbox');
         onToolChange('pan');

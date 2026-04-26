@@ -16,6 +16,13 @@ A comprehensive desktop application for browsing, annotating, and analyzing medi
 - **Brightness/Contrast**: CSS filter-based adjustments for optimal viewing
 - **Fit to Window**: Auto-fit images with one click or keyboard shortcut
 
+### Image Enhancement (NEW)
+- **Window/Level (WW/WL)**: DICOM-standard contrast/brightness control via WebGL shaders
+- **Gamma Correction**: Display calibration (0.1-3.0 range) for optimal brightness perception
+- **CLAHE**: Adaptive histogram equalization for local contrast enhancement
+- **Unsharp Mask**: Edge enhancement and sharpening filter
+- **Real-time 60fps**: All enhancements GPU-accelerated via WebGL 2.0
+
 ### Window Controls
 - **Minimize**: Collapse panels to save screen space
 - **Maximize**: Expand any panel to full screen
@@ -73,6 +80,7 @@ A comprehensive desktop application for browsing, annotating, and analyzing medi
 | B | Brightness/Contrast panel |
 | F | Fit to window |
 | 1-4 | Select annotation tool (bbox, polygon, keypoint, brush) |
+| E | Toggle enhancement panel (Window/Level, Gamma) |
 
 ### Cine Control
 | Key | Action |
