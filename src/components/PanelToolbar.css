@@ -28,9 +28,9 @@
   font-size: 12px;
 }
 
-/* Hide speed control on smaller toolbars */
+/* Speed control - always visible */
 .toolbar-right .speed-control {
-  display: none;
+  display: flex;
 }
 
 /* Hide zoom indicator on smaller toolbars */
@@ -38,9 +38,14 @@
   display: none;
 }
 
-/* Hide image counter text, keep minimal */
+/* Show image counter */
 .toolbar-right .image-counter {
-  display: none;
+  display: block;
+  min-width: 70px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .toolbar-center {
@@ -371,22 +376,27 @@
 .speed-control {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 4px;
+  gap: 6px;
+  padding: 0 8px;
   font-size: 11px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  margin: 0 4px;
 }
 
 .speed-control label {
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .speed-slider {
-  width: 60px;
-  height: 4px;
+  width: 80px;
+  height: 6px;
   -webkit-appearance: none;
   appearance: none;
   background: #2a2a3e;
-  border-radius: 2px;
+  border-radius: 3px;
   outline: none;
   cursor: pointer;
 }
